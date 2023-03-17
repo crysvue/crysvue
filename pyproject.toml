@@ -1,0 +1,87 @@
+# POETRY CONFIG
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+^/foo.py  # exclude a file named foo.py in the root of the project (in addition to the defaults)
+'''
+
+[tool.coverage.run]
+source = ['crysvue']
+
+[tool.github.info]
+organization = 'easyScience'
+repo = 'easyCrystallography'
+
+[tool.poetry]
+name = "crysvue"
+version = "0.0.1"
+description = "Crystallography viewer in vispy"
+license = "BSD-3-Clause"
+authors = ["Simon Ward"]
+#readme = "README.md"
+#homepage = "https://github.com/easyScience/easyCrystallography"
+#documentation = "https://github.com/easyScience/easyCrystallography"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",  # Define that your audience are developers
+    "Topic :: Scientific/Engineering :: Physics",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",  # Again, pick a license
+    "Programming Language :: Python :: 3 :: Only",
+]
+#include = ["CHANGELOG.md"]
+packages = [ { include = "crysvue" } ]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<=3.12"
+brille = "^0.7.0"
+numpy = "^1.21.4"
+pyopengl = "^3.1.6"
+vispy = "^0.12.1"
+glfw = "^2.5.6"
+jupyter_rfb = {version = "^0.3.3", optional = true}
+
+[tool.poetry.extras]
+notebook = ['jupyter_rfb']
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py{38,39,310,311}
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+    3.11: py311
+[gh-actions:env]
+PLATFORM =
+    ubuntu-latest: linux
+    macos-latest: macos
+    windows-latest: windows
+[testenv]
+passenv =
+    CI
+    GITHUB_ACTIONS
+    GITHUB_ACTION
+    GITHUB_REF
+    GITHUB_REPOSITORY
+    GITHUB_HEAD_REF
+    GITHUB_RUN_ID
+    GITHUB_SHA
+    COVERAGE_FILE
+deps = coverage
+whitelist_externals = poetry
+commands =
+    pip install '.[test]'
+    pytest --cov --cov-report=xml
+"""
