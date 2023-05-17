@@ -8,7 +8,7 @@ from vispy.scene.visuals import Compound, Text
 from vispy.visuals.markers import MarkersVisual
 from vispy.color import Color
 
-from crysvue.visual.components import Arrow3D
+from crysvue.visual.vispy.components import Arrow3D
 
 _COLORS = {
     'red':   Color('red'),

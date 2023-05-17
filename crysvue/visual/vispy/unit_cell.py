@@ -17,8 +17,12 @@ class UnitCellVisual(visuals.Visual):
     make a new visual class.
     """
 
-    def __init__(self, extent=(1, 1, 1), center=None, color=(0.5, 0.5, 0.5, 1)):
+    def __init__(self, extent=(1, 1, 1), center=None, color=(0.5, 0.5, 0.5, 1), frac_to_abc: np.ndarray = None):
         visuals.Visual.__init__(self, vcode=_UNIT_CELL_VERT, fcode=_UNIT_CELL_FRAG)
+
+        if frac_to_abc is None:
+            frac_to_abc = np.eye(3)
+        frac_to_abc = np.asarray(frac_to_abc)
 
         self.pos_buf = gloo.VertexBuffer()
 
@@ -43,7 +47,7 @@ class UnitCellVisual(visuals.Visual):
         if center is None:
             center = np.array(extent)/2
 
-        points = self.generate_unit_cell(extent=extent, center=center)
+        points = np.matmul(self.generate_unit_cell(extent=extent, center=center), frac_to_abc)
         self.set_data(points)
 
     def set_data(self, pos):

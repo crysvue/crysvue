@@ -1,5 +1,7 @@
 from vispy.scene import SceneCanvas
 
+import crysvue.visual.vispy as vp_visuals
+
 
 class CrystalCanvas(SceneCanvas):
 
@@ -46,3 +48,7 @@ class CrystalCanvas(SceneCanvas):
 
     def on_draw(self, event):
         super().on_draw(event)
+
+    @property
+    def components(self):
+        return {component_key: component for component_key, component in vp_visuals.__dict__.items() if isinstance(component, type) and component_key[0] != '_'}
