@@ -8,7 +8,7 @@ class CrystalCanvas(SceneCanvas):
     def __init__(self, *args, bg_color='white', camera='arcball', **kwargs):
         super(CrystalCanvas, self).__init__(*args, **kwargs)
         self.unfreeze()
-        self._elements = {k: dict() for k in ['atoms', 'bonds', 'axes', 'spins', 'unit_cell']}
+        self._elements = {k: dict() for k in ['atoms', 'bonds', 'axes', 'spins', 'unitcell']}
         self.view = self.central_widget.add_view()
         self.view.camera = camera
         if bg_color is not None:
@@ -25,6 +25,8 @@ class CrystalCanvas(SceneCanvas):
 
     def add_element(self, key, element):
         self.unfreeze()
+        if 'axis' in key:
+            key = 'axes'
         self._elements[key][element.name] = element
         if key == 'axes':
             vb = self.central_widget.add_view(camera='arcball')
@@ -43,6 +45,8 @@ class CrystalCanvas(SceneCanvas):
 
     def remove_element(self, key, element):
         self.unfreeze()
+        if 'axis' in key:
+            key = 'axes'
         del self._elements[key][element.name]
         self.freeze()
 
@@ -52,3 +56,6 @@ class CrystalCanvas(SceneCanvas):
     @property
     def components(self):
         return {component_key: component for component_key, component in vp_visuals.__dict__.items() if isinstance(component, type) and component_key[0] != '_'}
+
+    def create_component(self, component_key, *args, **kwargs):
+        return self.components[component_key](*args, **kwargs)

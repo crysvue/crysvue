@@ -2,6 +2,7 @@
 #  SPDX-License-Identifier: BSD-3-Clause
 #  © 2022-2023  Contributors to the easyCore project <https://github.com/easyScience/easyCrystallography>
 from dataclasses import dataclass, field
+from typing import List
 
 import numpy as np
 from vispy.scene.visuals import Compound, Text
@@ -9,6 +10,7 @@ from vispy.visuals.markers import MarkersVisual
 from vispy.color import Color
 
 from crysvue.visual.vispy.components import Arrow3D
+from crysvue.logic.axes import AxesLogic
 
 _COLORS = {
     'red':   Color('red'),
@@ -30,14 +32,21 @@ def _default_rotations():
                      [0, 0]])
 
 
-class XYZAxis(Compound):
-    _labels = ['X', 'Y', 'Z']
+class XYZAxis(Compound, AxesLogic):
 
-    def __init__(self, *args, rotations=None, radius=0.1, **kwargs):
+    def __init__(self, *args, radius=0.1, labels: List[str] = None, **kwargs):
+
+        if labels is None:
+            labels = ['X', 'Y', 'Z']
+        _kwargs = {}
+        if 'matrix' in kwargs:
+            _kwargs['matrix'] = kwargs.pop('matrix')
+        if 'positions' in kwargs:
+            _kwargs['positions'] = kwargs.pop('positions')
+
+        AxesLogic.__init__(self, labels=labels, **_kwargs)
+
         self._colors = _default_colors()
-        if rotations is None:
-            rotations = _default_rotations()
-        self.rotations = rotations
         visual_objs = [MarkersVisual(pos=np.array([[0, 0, 0], ]),
                                      size=[2 * radius],
                                      face_color=[Color('black')],
@@ -48,7 +57,7 @@ class XYZAxis(Compound):
         self._arrows = []
         self._texts = []
         for arrow_index, arrow_color in enumerate(self._colors):
-            arr = Arrow3D([0, 0, 0], self.rotations[arrow_index], color=arrow_color, rotate_xy=True)
+            arr = Arrow3D([0, 0, 0], self._rotation_angles[arrow_index], color=arrow_color, rotate_xy=True)
             self._arrows.append(arr)
             text = Text(self._labels[arrow_index], color=_COLORS['black'])
             text.font_size = 40
@@ -57,30 +66,6 @@ class XYZAxis(Compound):
             visual_objs.append(arr)
             visual_objs.append(text)
         super().__init__(visual_objs, *args, **kwargs)
-
-    @staticmethod
-    def _xyz_to_sphere(X, Y, Z):
-        if Z > 0:
-            theta = np.arctan2(np.sqrt(X ** 2 + Y ** 2), Z)
-        elif Z < 0:
-            theta = np.pi + np.arctan2(np.sqrt(X ** 2 + Y ** 2), Z)
-        elif Z == 0 and X != 0 and Y != 0:
-            theta = np.pi / 2
-        else:
-            theta = np.pi / 2
-        if X > 0:
-            phi = np.arctan2(Y, X)
-        elif X < 0 <= Y:
-            phi = np.pi + np.arctan2(Y, X)
-        elif X < 0 and Y < 0:
-            phi = -np.pi + np.arctan2(Y, X)
-        elif X == 0 and Y > 0:
-            phi = np.pi / 2
-        elif X == 0 and Y < 0:
-            phi = -np.pi / 2
-        else:
-            phi = 0
-        return theta, phi
 
     @property
     def arrows(self):
@@ -92,14 +77,6 @@ class XYZAxis(Compound):
 
 
 class ABCAxis(XYZAxis):
-    _labels = ['a', 'b', 'c']
 
     def __init__(self, lattice_matrix, *args, **kwargs):
-        positions = np.eye(3)
-        star_abc = np.matmul(positions, lattice_matrix)
-        rotation_angles = []
-        for i in range(3):
-            a, b, c = star_abc[i, :]
-            theta, phi = self._xyz_to_sphere(a, b, c)
-            rotation_angles.append([theta, phi])
-        super().__init__(*args, rotations=np.array(rotation_angles), **kwargs)
+        super().__init__(*args, matrix=lattice_matrix, labels=['a', 'b', 'c'], **kwargs)

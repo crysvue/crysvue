@@ -1,3 +1,7 @@
+#  SPDX-FileCopyrightText: 2023 easyCrystallography contributors <crystallography@easyscience.software>
+#  SPDX-License-Identifier: BSD-3-Clause
+#  © 2022-2023  Contributors to the easyCore project <https://github.com/easyScience/easyCrystallography>
+
 import os
 
 import numpy as np
@@ -10,19 +14,18 @@ with open(os.path.join(os.path.dirname(__file__), 'gloo', 'unit_cell.glv')) as f
 with open(os.path.join(os.path.dirname(__file__), 'gloo', 'unit_cell.glf')) as f:
     _UNIT_CELL_FRAG = f.read()
 
+from crysvue.logic.unit_cell import UnitCellLogic
 
-class UnitCellVisual(visuals.Visual):
+
+class UnitCellVisual(visuals.Visual, UnitCellLogic):
     """Example of a very simple GL-line visual.
     This shows the minimal set of methods that need to be reimplemented to
     make a new visual class.
     """
 
     def __init__(self, extent=(1, 1, 1), center=None, color=(0.5, 0.5, 0.5, 1), frac_to_abc: np.ndarray = None):
+        UnitCellLogic.__init__(self, extent=extent, center=center, frac_to_abc=frac_to_abc)
         visuals.Visual.__init__(self, vcode=_UNIT_CELL_VERT, fcode=_UNIT_CELL_FRAG)
-
-        if frac_to_abc is None:
-            frac_to_abc = np.eye(3)
-        frac_to_abc = np.asarray(frac_to_abc)
 
         self.pos_buf = gloo.VertexBuffer()
 
@@ -44,11 +47,7 @@ class UnitCellVisual(visuals.Visual):
         self._draw_mode = 'line_strip'
         self.set_gl_state('translucent', depth_test=False)
 
-        if center is None:
-            center = np.array(extent)/2
-
-        points = np.matmul(self.generate_unit_cell(extent=extent, center=center), frac_to_abc)
-        self.set_data(points)
+        self.set_data(self._unit_cell_points)
 
     def set_data(self, pos):
         self._pos = pos
@@ -67,75 +66,3 @@ class UnitCellVisual(visuals.Visual):
             # for most visuals.
             self.pos_buf.set_data(self._pos.astype(np.float32))
             self._need_upload = False
-
-    def generate_unit_cell(self, extent=(1, 1, 1), center=(0.5, 0.5, 0.5)):
-        points = []
-
-        # Add major lattice points
-        for z in np.arange(extent[2]):
-            for y in np.arange(extent[1]):
-                for x in np.arange(extent[0]):
-                    points.append([x, y, z])
-                    points.append([x + 1, y, z])
-                    points.append([None, None, None])
-
-                    points.append([x, y, z])
-                    points.append([x, y + 1, z])
-                    points.append([None, None, None])
-
-                    points.append([x, y, z])
-                    points.append([x, y, z + 1])
-                    points.append([None, None, None])
-
-                    points.append([x + 1, y + 1, z + 1])
-                    points.append([x + 1, y, z + 1])
-                    points.append([None, None, None])
-
-                    points.append([x + 1, y + 1, z + 1])
-                    points.append([x + 1, y + 1, z])
-                    points.append([None, None, None])
-
-                    points.append([x + 1, y + 1, z + 1])
-                    points.append([x, y + 1, z + 1])
-                    points.append([None, None, None])
-
-        # Draw x lines
-        for x in np.arange(extent[0]):
-            y = extent[1]
-            z = 0
-            points.append([x, y, z])
-            points.append([x + 1, y, z])
-            points.append([None, None, None])
-            z = extent[2]
-            y = 0
-            points.append([x, y, z])
-            points.append([x + 1, y, z])
-            points.append([None, None, None])
-
-        # Draw y lines
-        for y in np.arange(extent[1]):
-            x = 0
-            z = extent[2]
-            points.append([x, y, z])
-            points.append([x, y + 1, z])
-            points.append([None, None, None])
-            x = extent[0]
-            z = 0
-            points.append([x, y, z])
-            points.append([x, y + 1, z])
-            points.append([None, None, None])
-
-        # Draw z lines
-        for z in np.arange(extent[2]):
-            x = 0
-            y = extent[1]
-            points.append([x, y, z])
-            points.append([x, y, z + 1])
-            points.append([None, None, None])
-            x = extent[0]
-            y = 0
-            points.append([x, y, z])
-            points.append([x, y, z + 1])
-            points.append([None, None, None])
-
-        return np.array(points, dtype=np.float32) - np.array(center, dtype=np.float32)
