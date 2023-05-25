@@ -2,17 +2,25 @@
 #  SPDX-License-Identifier: BSD-3-Clause
 #  © 2022-2023  Contributors to the easyCore project <https://github.com/easyScience/easyCrystallography>
 
+from __future__ import annotations
+
 __author__ = "github.com/wardsimon"
 __version__ = "0.1.0"
 
-from typing import List
+from typing import List, Optional, Tuple
 
 import numpy as np
 
 
 class AxesLogic:
+    """
+    A class to represent an axis in 3D space
+    """
 
-    def __init__(self, labels: List[str], positions: np.array = None, matrix: np.array = None):
+    def __init__(self, labels: List[str], positions: Optional[np.array] = None, matrix: Optional[np.array] = None):
+        """
+        Calculate the rotation angles for the axis, set the labels and store the positions.
+        """
         self._labels = labels
         if positions is None:
             positions = np.eye(3)
@@ -29,7 +37,10 @@ class AxesLogic:
 
 
     @staticmethod
-    def _xyz_to_sphere(X, Y, Z):
+    def _xyz_to_sphere(X: float, Y: float, Z: float) -> Tuple[float, float]:
+        """
+        Convert cartesian coordinates to spherical coordinates
+        """
         if Z > 0:
             theta = np.arctan2(np.sqrt(X ** 2 + Y ** 2), Z)
         elif Z < 0:

@@ -1,5 +1,18 @@
-from vispy.scene import SceneCanvas
+#  SPDX-FileCopyrightText: 2023 easyCrystallography contributors <crystallography@easyscience.software>
+#  SPDX-License-Identifier: BSD-3-Clause
+#  © 2022-2023  Contributors to the easyCore project <https://github.com/easyScience/easyCrystallography>
 
+from __future__ import annotations
+
+__author__ = "github.com/wardsimon"
+__version__ = "0.1.0"
+
+from typing import Dict, TYPE_CHECKING, NoReturn
+
+if TYPE_CHECKING:
+    from crysvue.visual import V, VC
+
+from vispy.scene import SceneCanvas
 import crysvue.visual.vispy as vp_visuals
 
 
@@ -23,7 +36,7 @@ class CrystalCanvas(SceneCanvas):
             view_box.size = new_size, new_size
         return resize
 
-    def add_element(self, key, element):
+    def add_element(self, key: str, element: V) -> NoReturn:
         self.unfreeze()
         if 'axis' in key:
             key = 'axes'
@@ -43,19 +56,19 @@ class CrystalCanvas(SceneCanvas):
             element.parent = self.view.scene
         self.freeze()
 
-    def remove_element(self, key, element):
+    def remove_element(self, key: str, element: V) -> NoReturn:
         self.unfreeze()
         if 'axis' in key:
             key = 'axes'
         del self._elements[key][element.name]
         self.freeze()
 
-    def on_draw(self, event):
+    def on_draw(self, event) -> NoReturn:
         super().on_draw(event)
 
     @property
-    def components(self):
+    def components(self) -> Dict[str, VC]:
         return {component_key: component for component_key, component in vp_visuals.__dict__.items() if isinstance(component, type) and component_key[0] != '_'}
 
-    def create_component(self, component_key, *args, **kwargs):
+    def create_component(self, component_key: str, *args, **kwargs) -> V:
         return self.components[component_key](*args, **kwargs)
