@@ -77,7 +77,7 @@ class Canvas:
         else:
             raise NotImplementedError(f"Display mode {self.mode} not implemented")
 
-    def add_element(self, element: V) -> NoReturn:
+    def add_visual(self, element: V) -> NoReturn:
         """
         Adds a visual element to the canvas
         """
@@ -86,7 +86,7 @@ class Canvas:
             if visual_element not in self._canvas.components:
                 raise ValueError(f"Element {visual_element} not in canvas")
             visual_cls = self._canvas.components[visual_element]
-            self._canvas.add_element(visual_element.lower(), element._generate_visual(visual_cls))
+            self._canvas.add_visual(visual_element.lower(), element._generate_visual(visual_cls))
         else:
             raise NotImplementedError(f"Display mode {self.mode} not implemented")
 

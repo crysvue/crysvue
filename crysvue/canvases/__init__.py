@@ -10,10 +10,10 @@ __version__ = "0.1.0"
 from typing import Protocol, Dict
 
 class VisualCanvas(Protocol):
-    def add_element(self, key: str, element):
+    def add_visual(self, key: str, element):
         pass
 
-    def remove_element(self, key: str, element):
+    def remove_visual(self, key: str, element):
         pass
 
     @property

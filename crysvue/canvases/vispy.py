@@ -36,7 +36,7 @@ class CrystalCanvas(SceneCanvas):
             view_box.size = new_size, new_size
         return resize
 
-    def add_element(self, key: str, element: V) -> NoReturn:
+    def add_visual(self, key: str, element: V) -> NoReturn:
         self.unfreeze()
         if 'axis' in key:
             key = 'axes'
@@ -56,7 +56,7 @@ class CrystalCanvas(SceneCanvas):
             element.parent = self.view.scene
         self.freeze()
 
-    def remove_element(self, key: str, element: V) -> NoReturn:
+    def remove_visual(self, key: str, element: V) -> NoReturn:
         self.unfreeze()
         if 'axis' in key:
             key = 'axes'
