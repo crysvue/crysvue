@@ -1,3 +1,7 @@
+#  SPDX-FileCopyrightText: 2023 easyCrystallography contributors <crystallography@easyscience.software>
+#  SPDX-License-Identifier: BSD-3-Clause
+#  © 2022-2023  Contributors to the easyCore project <https://github.com/easyScience/easyCrystallography>
+
 from __future__ import annotations
 
 __author__ = "github.com/wardsimon"
@@ -73,17 +77,17 @@ class AtomLogic:
         return self._dataset['generators']
 
     @property
-    def colors(self):
+    def colors(self) -> List[List[float]]:
         return self._dataset['colors']
 
     @property
-    def sizes(self):
+    def sizes(self) -> List[float]:
         return self._dataset['sizes']
 
-    def generate_full_data(self, extent):
+    def generate_full_data(self, extent) -> dict:
         return self._generate_full_data(extent, set_data=False)
 
-    def _generate_full_data(self, extent=(1, 1, 1), set_data=True):
+    def _generate_full_data(self, extent=(1, 1, 1), set_data=True) -> Optional[dict]:
 
         positions, generators = self.generate_positions(self._position, extent)
 
@@ -98,21 +102,22 @@ class AtomLogic:
         else:
             return dataset
 
-    def generate_positions(self, atom, extent):
-        all_positions = []
-        generators = []
+    def generate_positions(self, atom: np.ndarray, extent: tuple):
+        all_positions = np.array(atom).reshape(-1, 3)
+        generators = [[np.eye(3), np.array(atom), np.zeros(3)]]
         for z in np.arange(-1, extent[2] + 1):
             for y in np.arange(-1, extent[1] + 1):
                 for x in np.arange(-1, extent[0] + 1):
                     for rot, trans in zip(self._symmetry.W, self._symmetry.w):
-                        all_positions.append(np.matmul(rot, atom + [x, y, z]) + trans)
-                        generators.append([rot, np.array([x, y, z]), trans])
-        positions, indices = np.unique(np.array(all_positions), axis=0, return_index=True)
-        generators = [generators[idx] for idx in indices]
-        logic = np.all(positions <= extent, axis=1) & np.all(positions >= 0, axis=1)
-        positions = positions[logic]
-        generators = [generators[index] for index in np.where(logic)[0]]
-        return positions, generators
+                        this_position = np.matmul(rot, atom + [x, y, z]) + trans
+                        # Check if this position is already in the list
+                        # and if it is within the extent
+                        if not np.any(np.all(all_positions == this_position, axis=1)) and \
+                                np.all(this_position >= 0) and \
+                                np.all(this_position <= extent):
+                            all_positions = np.concatenate((all_positions, this_position.reshape(-1, 3)))
+                            generators.append([rot, np.array([x, y, z]), trans])
+        return all_positions, generators
 
 
 class AtomsLogic:
@@ -186,6 +191,19 @@ class AtomsLogic:
             dataset['positions'] = np.concatenate([dataset['positions'], this_dataset['positions']])
             dataset['generators'] += this_dataset['generators']
         return dataset
+
+    def generate_spin_vectors(self, spin_vectors: np.ndarray) -> List[np.ndarray]:
+        spin_vectors = np.array(spin_vectors).reshape(-1, 3)
+        all_spin_vectors = []
+        if len(spin_vectors) != len(self._atoms):
+            raise ValueError("Number of spin vectors must match number of atoms")
+        for spin, atom in zip(spin_vectors, self._atoms):
+            generators = atom.generators
+            these_spin_vectors = []
+            for gen in generators:
+                these_spin_vectors.append(np.matmul(gen[0], spin))
+            all_spin_vectors.append(np.array(these_spin_vectors))
+        return all_spin_vectors
 
 
 COLOR_DATA = '#FFFFFF#D9FFFF#CC80FF#C2FF00#FFB5B5#909090#3050F8#FF0D0D#90E050#B3E3F5#AB5CF2#8AFF00#BFA6A6#F0C8A0' \
