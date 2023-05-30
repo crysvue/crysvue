@@ -7,7 +7,7 @@ from __future__ import annotations
 __author__ = "github.com/wardsimon"
 __version__ = "0.1.0"
 
-from typing import Literal, Optional, Dict, TYPE_CHECKING, NoReturn
+from typing import Literal, Optional, Dict, TYPE_CHECKING, NoReturn, List
 
 if TYPE_CHECKING:
     from crysvue.visual import V, VC
@@ -89,6 +89,10 @@ class Canvas:
             self._canvas.add_visual(visual_element.lower(), element._generate_visual(visual_cls))
         else:
             raise NotImplementedError(f"Display mode {self.mode} not implemented")
+
+    @property
+    def available_backends(self) -> List[str]:
+        return list(_CANVAS_DEFAULTS.keys())
 
     def run(self) -> Optional[VisualCanvas]:
         """
