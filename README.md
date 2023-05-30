@@ -7,7 +7,7 @@ Crysvue is a simple library to view crystal structures where the output is an Op
 Crysvue can be installed via pip:
 
 ```bash
-pip install https+git://github.com/crysvue/crysvue.git@develop
+pip install https+git://github.com/crysvue/crysvue.git
 ```
 
 ### Note
