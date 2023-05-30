@@ -62,3 +62,8 @@ canvas.add_visual(atoms_visual)
 canvas.run()
 ```
 
+# Binder
+
+You can also run the examples in the cloud using Binder:
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/crysvue/crysvue/HEAD)
