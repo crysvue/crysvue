@@ -104,7 +104,7 @@ class AtomLogic:
 
     def generate_positions(self, atom: np.ndarray, extent: tuple):
         all_positions = np.array(atom).reshape(-1, 3)
-        generators = [[np.zeros((3, 3)), np.array(atom), np.zeros(3)]]
+        generators = [[np.eye(3), np.array(atom), np.zeros(3)]]
         for z in np.arange(-1, extent[2] + 1):
             for y in np.arange(-1, extent[1] + 1):
                 for x in np.arange(-1, extent[0] + 1):
@@ -191,6 +191,19 @@ class AtomsLogic:
             dataset['positions'] = np.concatenate([dataset['positions'], this_dataset['positions']])
             dataset['generators'] += this_dataset['generators']
         return dataset
+
+    def generate_spin_vectors(self, spin_vectors: np.ndarray) -> List[np.ndarray]:
+        spin_vectors = np.array(spin_vectors).reshape(-1, 3)
+        all_spin_vectors = []
+        if len(spin_vectors) != len(self._atoms):
+            raise ValueError("Number of spin vectors must match number of atoms")
+        for spin, atom in zip(spin_vectors, self._atoms):
+            generators = atom.generators
+            these_spin_vectors = []
+            for gen in generators:
+                these_spin_vectors.append(np.matmul(gen[0], spin))
+            all_spin_vectors.append(np.array(these_spin_vectors))
+        return all_spin_vectors
 
 
 COLOR_DATA = '#FFFFFF#D9FFFF#CC80FF#C2FF00#FFB5B5#909090#3050F8#FF0D0D#90E050#B3E3F5#AB5CF2#8AFF00#BFA6A6#F0C8A0' \
