@@ -46,7 +46,7 @@ brille = "^0.7.0"
 numpy = "^1.21.4"
 pyopengl = "^3.1.6"
 vispy = "^0.12.1"
-glfw = "^2.5.6"
+glfw = "^2.5.9"
 jupyter_rfb = {version = "^0.3.3", optional = true}
 
 [tool.poetry.extras]
